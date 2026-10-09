@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>دفتر المبيعات والديون</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="light">
+
+  <svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="icon-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></symbol>
+    <symbol id="icon-home" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="icon-group" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></symbol>
+    <symbol id="icon-user-add" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></symbol>
+    <symbol id="icon-receipt" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 8h8"/><path d="M7 12h10"/><path d="M7 16h6"/></symbol>
+    <symbol id="icon-inventory" viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></symbol>
+    <symbol id="icon-add" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+    <symbol id="icon-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></symbol>
+    <symbol id="icon-edit" viewBox="0 0 24 24"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></symbol>
+    <symbol id="icon-delete" viewBox="0 0 24 24"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></symbol>
+    <symbol id="icon-done-all" viewBox="0 0 24 24"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></symbol>
+    <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="icon-payments" viewBox="0 0 24 24"><path d="M12.5 19H4a2 2 0 01-2-2V7a2 2 0 012-2h16a2 2 0 012 2v4"/><path d="M2 10h20"/><path d="M6 14h2"/><path d="m16 17 2 2 4-4"/></symbol>
+    <symbol id="icon-tune" viewBox="0 0 24 24"><path d="M10 5H3"/><path d="M12 19H3"/><path d="M14 3v4"/><path d="M16 17v4"/><path d="M21 12h-9"/><path d="M21 19h-5"/><path d="M21 5h-7"/><path d="M8 10v4"/><path d="M8 12H3"/></symbol>
+    <symbol id="icon-filter" viewBox="0 0 24 24"><path d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"/></symbol>
+    <symbol id="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
+    <symbol id="icon-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></symbol>
+    <symbol id="icon-close" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="icon-eye" viewBox="0 0 24 24"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="icon-eye-off" viewBox="0 0 24 24"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></symbol>
+    <symbol id="icon-store" viewBox="0 0 24 24"><path d="M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5"/><path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.248l2.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.873l2.895 4.192a2.5 2.5 0 0 1-3.774 3.244"/><path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.05"/></symbol>
+    <symbol id="icon-credit-card" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/><path d="M6 14h2"/></symbol>
+    <symbol id="icon-contrast" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 18a6 6 0 0 0 0-12v12z"/></symbol>
+    <symbol id="icon-palette" viewBox="0 0 24 24"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/></symbol>
+    <symbol id="icon-corner" viewBox="0 0 24 24"><path d="M21 11a8 8 0 0 0-8-8"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></symbol>
+    <symbol id="icon-cloud" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></symbol>
+    <symbol id="icon-cloud-upload" viewBox="0 0 24 24"><path d="M12 13v8"/><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="m8 17 4-4 4 4"/></symbol>
+    <symbol id="icon-cloud-download" viewBox="0 0 24 24"><path d="M12 13v8l-4-4"/><path d="m12 21 4-4"/><path d="M4.393 15.269A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.436 8.284"/></symbol>
+    <symbol id="icon-hard-drive-download" viewBox="0 0 24 24"><path d="M12 2v8"/><path d="m16 6-4 4-4-4"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 18h.01"/><path d="M10 18h.01"/></symbol>
+    <symbol id="icon-hard-drive-upload" viewBox="0 0 24 24"><path d="m16 6-4-4-4 4"/><path d="M12 2v8"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 18h.01"/><path d="M10 18h.01"/></symbol>
+    <symbol id="icon-arrow-forward" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="icon-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="icon-list" viewBox="0 0 24 24"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></symbol>
+    <symbol id="icon-error" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></symbol>
+    <symbol id="icon-warning" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></symbol>
+    <symbol id="icon-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></symbol>
+    <symbol id="icon-print" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></symbol>
+    <symbol id="icon-rotate-ccw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
+    <symbol id="icon-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><polyline points="12 7 12 12 15 15"/></symbol>
+    <symbol id="icon-user-login" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></symbol>
+    <symbol id="icon-user-signup" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15 7a4 4 0 11-8 0 4 4 0 018 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M11 14a7 7 0 00-7 7h11"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 11v6m-3-3h6"/></symbol>
+    <symbol id="icon-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="icon-zoom" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.34-4.34"/><path d="M11 8v6"/><path d="M8 11h6"/></symbol>
+    <symbol id="icon-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="icon-calendar" viewBox="0 0 24 24"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></symbol>
+  </svg>
+
+  <div id="toast" class="toast">
+    <svg class="app-icon" id="toast-icon"><use href="#icon-check"/></svg>
+    <span id="toast-msg">تمت العملية بنجاح</span>
+  </div>
+
+  <div id="custom-dialog" class="dialog-overlay">
+    <div class="dialog-box">
+      <div class="dialog-icon-wrap">
+        <div class="dialog-icon" id="dialog-icon-wrap">
+          <svg class="app-icon"><use href="#icon-warning"/></svg>
+        </div>
+      </div>
+      <h3 class="dialog-title" id="dialog-title">تأكيد الإجراء</h3>
+      <p class="dialog-desc" id="dialog-desc">هل أنت متأكد من المتابعة؟</p>
+      <div id="dialog-confirm-input-wrap" class="dialog-confirm-input" style="display:none;">
+        <label class="form-label">اكتب كلمة "تأكيد" للمتابعة</label>
+        <input type="text" id="dialog-confirm-input" class="form-input" placeholder="تأكيد" autocomplete="off">
+      </div>
+      <div class="dialog-btns">
+        <button type="button" class="dialog-btn cancel" onclick="closeCustomDialog(false)">إلغاء</button>
+        <button type="button" class="dialog-btn confirm" id="dialog-confirm-btn">تأكيد</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cust-popup-backdrop" id="cust-popup-backdrop" onclick="closeCustRowPopup()"></div>
+  <div class="cust-row-popup" id="cust-row-popup">
+    <div class="cust-popup-header">الخيارات</div>
+    <button type="button" class="cust-popup-item edit" onclick="handleCustPopupAction('edit')">
+      <svg class="app-icon"><use href="#icon-edit"/></svg>
+      <span>تعديل</span>
+    </button>
+    <button type="button" class="cust-popup-item delete" onclick="handleCustPopupAction('delete')">
+      <svg class="app-icon"><use href="#icon-delete"/></svg>
+      <span>حذف</span>
+    </button>
+  </div>
+
+  <div class="app-container">
+  
+  <header class="top-header" id="main-app-header">
+    <div class="brand-wrap" onclick="switchTab('dashboard')">
+      <div class="brand-mark">
+        <svg class="app-icon"><use href="#icon-wallet"/></svg>
+      </div>
+      <div class="brand-info">
+        <span class="brand-name-row">
+          <span class="brand-name" id="header-app-name">دفتر المبيعات</span>
+          <button type="button" class="brand-switch-btn" onclick="event.stopPropagation(); openNotebooksModal()" title="تبديل الدفتر" aria-label="تبديل الدفتر">
+            <svg class="app-icon"><use href="#icon-chevron-down"/></svg>
+          </button>
+        </span>
+        <span class="brand-meta">
+          <span class="sync-dot" id="drive-sync-dot"></span>
+          <span id="drive-sync-status-text">جاري الاتصال...</span>
+        </span>
+      </div>
+    </div>
+
+    <nav class="desktop-nav-group">
+      <button class="desktop-nav-item active" id="desk-btn-dashboard" onclick="switchTab('dashboard')">
+        <svg class="app-icon"><use href="#icon-home"/></svg>
+        <span>الرئيسية</span>
+      </button>
+      <button class="desktop-nav-item" id="desk-btn-customers" onclick="switchTab('customers')">
+        <svg class="app-icon"><use href="#icon-group"/></svg>
+        <span>الزبائن</span>
+      </button>
+      <button class="desktop-nav-item" id="desk-btn-sales" onclick="switchTab('sales')">
+        <svg class="app-icon"><use href="#icon-receipt"/></svg>
+        <span>العمليات</span>
+      </button>
+      <button class="desktop-nav-item" id="desk-btn-purchases" onclick="switchTab('purchases')">
+        <svg class="app-icon"><use href="#icon-inventory"/></svg>
+        <span>المشتريات</span>
+      </button>
+      <button class="btn-primary-sm" id="btn-new-sale-desktop" onclick="openSaleModal()" style="margin-right: 6px;">
+        <svg class="app-icon"><use href="#icon-add"/></svg>
+        <span id="btn-new-sale-desktop-text">بيع جديد</span>
+      </button>
+    </nav>
+
+    <div class="header-actions">
+      <button class="icon-btn" onclick="toggleTheme()" title="تبديل المظهر">
+        <svg class="app-icon" id="theme-icon"><use href="#icon-moon"/></svg>
+      </button>
+      <button class="icon-btn" onclick="openSubPage('settings')" title="الإعدادات">
+        <svg class="app-icon"><use href="#icon-tune"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div id="connection-banner" class="connection-banner" role="alert" aria-live="polite">
+    <span id="connection-banner-text">لا يتوفر اتصال في الشبكة</span>
+    <button type="button" class="connection-banner-close" onclick="hideConnectionBanner()" aria-label="إخفاء">
+      <svg class="app-icon"><use href="#icon-close"/></svg>
+    </button>
+  </div>
+
+  <!-- PAGE 1: DASHBOARD -->
+  <div id="page-dashboard" class="page-section active">
+    <div class="page-header">
+      <h1 class="page-title" id="dashboard-title">لوحة التحكم</h1>
+      <p class="page-subtitle" id="dashboard-date">—</p>
+    </div>
+
+    <div class="auth-notice-card" id="dashboard-auth-notice" style="display:none; position:relative;">
+      <button class="auth-notice-dismiss" onclick="dismissDashboardAuthNotice()" title="إخفاء" aria-label="إخفاء">
+        <svg class="app-icon"><use href="#icon-close"/></svg>
+      </button>
+      <div class="auth-notice-text">
+        <div class="auth-notice-title">هل لديك حساب؟</div>
+        <div class="auth-notice-desc">سجّل الدخول لحفظ بياناتك ومزامنتها بأمان عبر أجهزتك.</div>
+      </div>
+      <button class="auth-notice-btn" onclick="openAuthModal()">
+        <svg class="app-icon"><use href="#icon-user-add"/></svg>
+        <span>تسجيل الدخول</span>
+      </button>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-card-top">
+        <div>
+          <div class="summary-label" id="summary-main-label">إجمالي المبيعات</div>
+          <div class="summary-amount" id="stat-total-sales">0 د.ع</div>
+        </div>
+        <button class="btn-ghost-sm" id="btn-show-purchases-summary" onclick="switchTab('purchases')">
+          المشتريات
+        </button>
+      </div>
+      
+      <div class="summary-divider"></div>
+      
+      <div class="summary-footer">
+        <div class="summary-footer-item" id="card-purchases-cost">
+          <span class="label">تكلفة المشتريات</span>
+          <span class="value" id="stat-total-purchases">0 د.ع</span>
+        </div>
+        <div class="summary-footer-item" id="card-net-profit">
+          <span class="label">صافي الربح</span>
+          <span class="value positive" id="stat-net-profit">0 د.ع</span>
+        </div>
+        <div class="summary-footer-item" id="card-total-paid-dash" style="display:none;">
+          <span class="label">إجمالي المدفوع</span>
+          <span class="value positive" id="stat-total-paid-dash">0 د.ع</span>
+        </div>
+        <div class="summary-footer-item" id="card-total-debt-dash" style="display:none;">
+          <span class="label">إجمالي الديون</span>
+          <span class="value" id="stat-total-debt-dash" style="color:var(--danger);">0 د.ع</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="metric-head">
+          <span class="metric-label">المبالغ المقبوضة</span>
+          <div class="metric-icon success"><svg class="app-icon"><use href="#icon-check"/></svg></div>
+        </div>
+        <div class="metric-value success" id="stat-total-paid">0 د.ع</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-head">
+          <span class="metric-label" id="metric-label-debt">المستحقات المعلقة</span>
+          <div class="metric-icon danger"><svg class="app-icon"><use href="#icon-clock"/></svg></div>
+        </div>
+        <div class="metric-value danger" id="stat-total-debt">0 د.ع</div>
+      </div>
+
+      <div class="metric-card" id="metric-card-customers-count">
+        <div class="metric-head">
+          <span class="metric-label">عدد الزبائن</span>
+          <div class="metric-icon brand"><svg class="app-icon"><use href="#icon-group"/></svg></div>
+        </div>
+        <div class="metric-value" id="stat-customers-count">0</div>
+      </div>
+
+      <div class="metric-card" id="metric-card-ops-count">
+        <div class="metric-head">
+          <span class="metric-label">عدد العمليات</span>
+          <div class="metric-icon warning"><svg class="app-icon"><use href="#icon-receipt"/></svg></div>
+        </div>
+        <div class="metric-value" id="stat-sales-count">0</div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-head-title" id="section-head-unsettled-title">ديون ومستحقات معلقة</span>
+      <span class="section-head-link" onclick="navigateToCustomerDebtors()">عرض الكل</span>
+    </div>
+    <div id="unsettled-sales-list"></div>
+  </div>
+
+  <!-- PAGE 2: CUSTOMERS -->
+  <div id="page-customers" class="page-section">
+    <div class="page-header">
+      <h1 class="page-title">الزبائن والحسابات</h1>
+      <p class="page-subtitle">إجمالي الزبائن المسجلين: <span id="customers-badge-count">0</span></p>
+    </div>
+
+    <div class="section-head" style="margin-top:0;">
+      <span class="section-head-title">قائمة الزبائن</span>
+      <button class="btn-primary-sm" onclick="openCustomerModal()">
+        <svg class="app-icon"><use href="#icon-add"/></svg> زبون جديد
+      </button>
+    </div>
+
+    <div class="filter-row">
+      <button class="filter-btn active" id="cust-list-filter-all" onclick="setCustomerListFilter('all', this)">الكل</button>
+      <button class="filter-btn" id="cust-list-filter-debtors" onclick="setCustomerListFilter('debtors', this)">عليهم ديون</button>
+      <button class="filter-btn" id="cust-list-filter-cleared" onclick="setCustomerListFilter('cleared', this)">حسابات مسددة</button>
+    </div>
+
+    <div class="search-wrap">
+      <svg class="app-icon search-icon"><use href="#icon-search"/></svg>
+      <input type="text" class="search-input" id="customer-search" placeholder="بحث بالاسم أو رقم الهاتف" oninput="renderCustomers()">
+    </div>
+
+    <div id="customers-list"></div>
+  </div>
+
+  <!-- PAGE 3: PURCHASES -->
+  <div id="page-purchases" class="page-section">
+    <div class="page-header">
+      <h1 class="page-title">المشتريات والبضائع</h1>
+      <p class="page-subtitle">سجل البضائع المُشتراة وتكلفتها</p>
+    </div>
+
+    <div class="section-head" style="margin-top:0;">
+      <span class="section-head-title">سجل المشتريات</span>
+      <button class="btn-primary-sm" onclick="openPurchaseModal()">
+        <svg class="app-icon"><use href="#icon-add"/></svg> إضافة مشتريات
+      </button>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-card-top">
+        <div>
+          <div class="summary-label">إجمالي تكلفة المشتريات</div>
+          <div class="summary-amount" id="purchases-total-amount">0 د.ع</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="search-wrap">
+      <svg class="app-icon search-icon"><use href="#icon-search"/></svg>
+      <input type="text" class="search-input" id="purchases-search" placeholder="بحث في المشتريات والمواد" oninput="renderPurchases()">
+    </div>
+
+    <div id="purchases-list"></div>
+  </div>
+
+  <!-- PAGE 4: SALES -->
+  <div id="page-sales" class="page-section">
+    <div class="page-header">
+      <h1 class="page-title" id="sales-page-title">سجل العمليات</h1>
+      <p class="page-subtitle" id="sales-page-subtitle">جميع المبيعات والتسديدات</p>
+    </div>
+
+    <div class="section-head" style="margin-top:0;">
+      <span class="section-head-title" id="sales-section-title">السجل المالي</span>
+    </div>
+
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="setSalesFilter('all', this)">الكل</button>
+      <button class="filter-btn" onclick="setSalesFilter('repayments_only', this)">التسديدات</button>
+      <button class="filter-btn" onclick="setSalesFilter('debt', this)">دين كامل</button>
+      <button class="filter-btn" onclick="setSalesFilter('partial', this)">مدفوع جزئي</button>
+      <button class="filter-btn" onclick="setSalesFilter('paid', this)">مدفوع بالكامل</button>
+    </div>
+
+    <div class="search-wrap">
+      <svg class="app-icon search-icon"><use href="#icon-search"/></svg>
+      <input type="text" class="search-input" id="sales-search" placeholder="بحث في العمليات" oninput="renderSales()">
+    </div>
+
+    <div id="all-sales-list"></div>
+  </div>
+
+  <!-- PAGE 5: CUSTOMER DETAIL -->
+  <div id="page-customer-detail" class="page-section">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px; padding-top: 4px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <button class="icon-btn" onclick="appBack()"><svg class="app-icon"><use href="#icon-arrow-forward"/></svg></button>
+        <div>
+          <h2 id="cust-detail-name" style="font-size: 17px; font-weight: 800; color:var(--text-primary); line-height: 1.25;">تفاصيل الزبون</h2>
+          <span id="cust-detail-phone" style="font-size: 12px; color:var(--text-muted); line-height: 1.25;">---</span>
+        </div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="icon-btn" onclick="openEditCustomerModal(state.selectedCustomerIdForDetail)" title="تعديل"><svg class="app-icon"><use href="#icon-edit"/></svg></button>
+        <button class="icon-btn" style="color:var(--danger);" onclick="confirmDeleteCustomer(state.selectedCustomerIdForDetail)" title="حذف"><svg class="app-icon"><use href="#icon-delete"/></svg></button>
+      </div>
+    </div>
+
+    <div class="customer-summary">
+      <div class="customer-summary-top">
+        <div>
+          <div class="customer-summary-label">الرصيد المستحق حالياً</div>
+          <div class="customer-summary-amount" id="cust-detail-debt">0 د.ع</div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:flex-start; gap:10px;">
+          <button type="button" class="btn-ghost-sm" onclick="openPDFReportModal(state.selectedCustomerIdForDetail)">
+            <svg class="app-icon" style="width:14px; height:14px;"><use href="#icon-receipt"/></svg>
+            <span>كشف حساب</span>
+          </button>
+          <div id="cust-detail-notes" class="customer-summary-note"></div>
+        </div>
+      </div>
+
+      <div class="action-grid">
+        <button type="button" class="action-btn success" onclick="openCustomerRepaymentModal()">
+          <svg class="app-icon"><use href="#icon-payments"/></svg> تسديد مبلغ
+        </button>
+        <button type="button" class="action-btn primary" id="btn-cust-add-sale" onclick="openSaleModalForCurrentCustomer()">
+          <svg class="app-icon"><use href="#icon-add"/></svg> <span id="btn-cust-add-sale-text">تسجيل بيع</span>
+        </button>
+      </div>
+
+      <div class="customer-summary-foot">
+        <div>
+          <span class="label" id="cust-detail-sales-label">إجمالي المشتريات</span>
+          <span class="value" id="cust-detail-sales">0 د.ع</span>
+        </div>
+        <div>
+          <span class="label">إجمالي المدفوع</span>
+          <span class="value success" id="cust-detail-paid">0 د.ع</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="section-head-title">سجل المعاملات</span>
+      <div style="display:flex; gap:6px; position:relative;">
+        <button type="button" class="icon-btn" id="btn-cust-view" onclick="toggleCustomerViewMenu(event)" title="طريقة العرض">
+          <svg class="app-icon"><use href="#icon-list"/></svg>
+        </button>
+        <button type="button" class="icon-btn" id="btn-cust-filter" onclick="toggleCustomerFilterRow()" title="فلترة">
+          <svg class="app-icon"><use href="#icon-filter"/></svg>
+        </button>
+
+        <div class="view-mode-menu" id="cust-view-menu">
+          <button type="button" class="view-mode-item" data-mode="cards" onclick="setCustomerViewMode('cards')">
+            <svg class="app-icon"><use href="#icon-receipt"/></svg>
+            <span>كرت</span>
+          </button>
+          <button type="button" class="view-mode-item" data-mode="table" onclick="setCustomerViewMode('table')">
+            <svg class="app-icon"><use href="#icon-list"/></svg>
+            <span>جدول</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="cust-filter-row" class="collapsible">
+      <div class="filter-row" style="margin-bottom: 8px;">
+        <button class="filter-btn active" id="cust-filter-all" onclick="setCustomerHistoryFilter('all')">الكل</button>
+        <button class="filter-btn" id="cust-filter-sales" onclick="setCustomerHistoryFilter('sales')">المبيعات</button>
+        <button class="filter-btn" id="cust-filter-repay" onclick="setCustomerHistoryFilter('repayments')">التسديدات</button>
+        <button class="filter-btn" id="cust-filter-debts" onclick="setCustomerHistoryFilter('debts')">الديون</button>
+      </div>
+    </div>
+
+    <div id="cust-detail-sales-list"></div>
+  </div>
+
+  <!-- PAGE 6: SETTINGS -->
+  <div id="page-settings" class="page-section">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom: 20px; padding-top: 4px;">
+      <button class="icon-btn" onclick="appBack()"><svg class="app-icon"><use href="#icon-arrow-forward"/></svg></button>
+      <h2 style="font-size: 18px; font-weight: 800; letter-spacing:-0.3px;">الإعدادات والبيانات</h2>
+    </div>
+
+    <div class="auth-notice-card" id="settings-auth-notice" style="display:none;">
+      <div class="auth-notice-text">
+        <div class="auth-notice-title">هل لديك حساب؟</div>
+        <div class="auth-notice-desc">سجّل الدخول لحفظ بياناتك ومزامنتها بأمان عبر أجهزتك.</div>
+      </div>
+      <button class="auth-notice-btn" onclick="openAuthModal()">
+        <svg class="app-icon"><use href="#icon-user-add"/></svg>
+        <span>تسجيل الدخول</span>
+      </button>
+    </div>
+
+    <div class="account-card" id="settings-account-card" style="display:none;">
+      <div class="account-card-head">
+        <div class="account-avatar" id="account-avatar-letter">م</div>
+        <div class="account-info">
+          <div class="account-name" id="account-display-name">—</div>
+          <div class="account-email" id="account-display-email">—</div>
+        </div>
+      </div>
+      <div class="account-card-body">
+        <div class="account-status-row">
+          <span class="account-status-dot"></span>
+          <span>الحساب متصل والمزامنة نشطة</span>
+        </div>
+        <button type="button" class="account-edit-btn" onclick="openEditAccountModal()">
+          <svg class="app-icon"><use href="#icon-edit"/></svg>
+          <span>تعديل البيانات</span>
+        </button>
+        <button class="account-logout-btn" onclick="handleLogout()">
+          تسجيل الخروج
+        </button>
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-row" onclick="openNotebooksModal()">
+        <span class="settings-row-title">
+          <svg class="app-icon"><use href="#icon-wallet"/></svg>
+          الدفاتر
+        </span>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="settings-row-value" id="settings-current-notebook-name">دفتر المبيعات</span>
+          <svg class="app-icon" style="color:var(--text-muted); width:16px; height:16px;"><use href="#icon-chevron-left"/></svg>
+        </div>
+      </div>
+      <div class="settings-row" onclick="openCurrencyModal()">
+  <span class="settings-row-title"><svg class="app-icon"><use href="#icon-credit-card"/></svg> العملة</span>
+  <div style="display:flex; align-items:center; gap:8px;">
+    <span class="settings-row-value" id="settings-current-currency">دينار عراقي (د.ع)</span>
+    <svg class="app-icon" style="color:var(--text-muted); width:16px; height:16px;"><use href="#icon-chevron-left"/></svg>
+  </div>
+</div>
+      <div class="settings-row" style="cursor: default;">
+        <span class="settings-row-title"><svg class="app-icon"><use href="#icon-contrast"/></svg> المظهر</span>
+        <div class="theme-switch light" id="theme-switch">
+          <div class="theme-switch-slider"></div>
+          <button type="button" class="theme-switch-btn" data-mode="light" onclick="setThemeMode('light')" title="نهاري">
+            <svg class="app-icon"><use href="#icon-sun"/></svg>
+          </button>
+          <button type="button" class="theme-switch-btn" data-mode="dark" onclick="setThemeMode('dark')" title="ليلي">
+            <svg class="app-icon"><use href="#icon-moon"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <div style="padding: 14px 16px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <svg class="app-icon" style="color:var(--text-muted);"><use href="#icon-receipt"/></svg>
+            <div>
+              <div style="font-size:13.5px; font-weight:800; color:var(--text-primary);">نظام الديون المبسط</div>
+            </div>
+          </div>
+          <label class="switch-ui">
+            <input type="checkbox" id="toggle-simplified-debt" onchange="toggleSimplifiedDebtMode(this.checked)">
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-row" onclick="openActivityLogModal()">
+        <span class="settings-row-title">
+          <svg class="app-icon"><use href="#icon-history"/></svg> سجل النشاطات
+        </span>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span id="activity-log-count-badge" class="badge badge-brand num" style="height:22px; min-height:22px; font-size:11px; padding:0 8px;">0</span>
+          <svg class="app-icon" style="color:var(--text-muted); width:16px; height:16px;"><use href="#icon-chevron-left"/></svg>
+        </div>
+      </div>
+      <div class="settings-row" onclick="exportDataBackup()">
+        <span class="settings-row-title"><svg class="app-icon"><use href="#icon-hard-drive-download"/></svg> تصدير نسخة احتياطية</span>
+        <svg class="app-icon" style="color:var(--text-muted); width:16px; height:16px;"><use href="#icon-chevron-left"/></svg>
+      </div>
+      <div class="settings-row" onclick="triggerImportFileInput()">
+        <span class="settings-row-title"><svg class="app-icon"><use href="#icon-hard-drive-upload"/></svg> استيراد نسخة احتياطية</span>
+        <svg class="app-icon" style="color:var(--text-muted); width:16px; height:16px;"><use href="#icon-chevron-left"/></svg>
+      </div>
+      <input type="file" id="import-file-input" style="display:none;" accept=".json,application/json,text/plain,text/json,*/*" onchange="importDataBackup(event)">
+    </div>
+
+    <div class="settings-block">
+      <div style="padding: 16px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom: 10px;">
+          <span class="settings-row-title">
+            <svg class="app-icon"><use href="#icon-cloud"/></svg> الحفظ السحابي
+          </span>
+          <button type="button" class="btn-primary-sm" onclick="FirebaseService.syncData(true)">
+            <svg class="app-icon"><use href="#icon-cloud-upload"/></svg>
+            <span>النسخ الاحتياطي</span>
+          </button>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+          <span style="font-size:12px; color:var(--text-muted); line-height:1.5;">
+            حفظ تلقائي وآمن لبياناتك.
+          </span>
+          <span id="gdrive-sync-msg" style="font-size:11.5px; font-weight:700; color:var(--brand); white-space:nowrap;">
+            جاهز للمزامنة
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-row" onclick="confirmResetAllData()" style="color: var(--danger);">
+        <span class="settings-row-title" style="color: var(--danger);"><svg class="app-icon" style="color: var(--danger);"><use href="#icon-delete"/></svg> حذف جميع البيانات</span>
+        <svg class="app-icon" style="width:16px; height:16px;"><use href="#icon-chevron-left"/></svg>
+      </div>
+    </div>
+
+    <div style="text-align: center; color: var(--text-muted); font-size: 11.5px; margin-top: 22px; padding-bottom: 20px;">
+      نظام دفتر المبيعات والديون — الإصدار 4.1
+    </div>
+  </div>
+
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <button class="nav-tab active" id="dock-btn-dashboard" onclick="switchTab('dashboard')">
+        <svg class="app-icon"><use href="#icon-home"/></svg>
+        <span>الرئيسية</span>
+      </button>
+      <button class="nav-tab" id="dock-btn-customers" onclick="switchTab('customers')">
+        <svg class="app-icon"><use href="#icon-group"/></svg>
+        <span>الزبائن</span>
+      </button>
+      <div class="nav-fab-wrap">
+        <button class="nav-fab" onclick="openSaleModal()" title="إضافة عملية">
+          <svg class="app-icon"><use href="#icon-add"/></svg>
+        </button>
+      </div>
+      <button class="nav-tab" id="dock-btn-sales" onclick="switchTab('sales')">
+        <svg class="app-icon"><use href="#icon-receipt"/></svg>
+        <span>العمليات</span>
+      </button>
+      <button class="nav-tab" id="dock-btn-purchases" onclick="switchTab('purchases')">
+        <svg class="app-icon"><use href="#icon-inventory"/></svg>
+        <span>المشتريات</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MODAL: PURCHASE -->
+  <div id="modal-purchase" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-top-wrap">
+        <div class="modal-handle"></div>
+        <div class="modal-head">
+          <h3 class="modal-title" id="purchase-modal-title">إضافة مشتريات</h3>
+          <button class="close-btn" onclick="closeModal('modal-purchase')"><svg class="app-icon"><use href="#icon-close"/></svg></button>
+        </div>
+      </div>
+
+      <form id="purchase-form" novalidate onsubmit="handleSavePurchase(event)" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
+        <input type="hidden" id="purchase-id" value="">
+        
+        <div class="modal-scrollable-body">
+          <div id="purchase-form-error" class="form-error">
+            <svg class="app-icon"><use href="#icon-error"/></svg>
+            <span id="purchase-form-error-text"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">نوع الصنف / اسم البضاعة</label>
+            <input type="text" id="purchase-category" class="form-input" placeholder="مثال: بضاعة أولى، منظفات، أواني" autocomplete="off">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">المواد مع أسعارها</label>
+            <div class="materials-block">
+              <div class="materials-head">
+                <span class="materials-title"><svg class="app-icon"><use href="#icon-list"/></svg> قائمة المواد</span>
+              </div>
+
+              <div id="purchase-materials-list"></div>
+
+              <button type="button" class="add-row-btn" onclick="addPurchaseMaterialRow()">
+                <svg class="app-icon"><use href="#icon-add"/></svg> إضافة مادة
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">ملاحظات (اختياري)</label>
+            <input type="text" id="purchase-notes" class="form-input" placeholder="اسم المورد أو تفاصيل إضافية">
+          </div>
+        </div>
+
+        <div class="modal-sticky-footer">
+          <div class="materials-total" style="margin-top:0; margin-bottom:10px;">
+            <span class="label">الإجمالي الكلي</span>
+            <span class="value" id="purchase-total-preview">0 د.ع</span>
+          </div>
+          <button type="submit" id="purchase-submit-btn" class="btn-submit">
+            <svg class="app-icon"><use href="#icon-check"/></svg> حفظ المشتريات
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: PURCHASE DETAILS -->
+  <div id="modal-purchase-detail" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-top-wrap">
+        <div class="modal-handle"></div>
+        <div class="modal-head">
+          <h3 class="modal-title">تفاصيل المشتريات</h3>
+          <button class="close-btn" onclick="closeModal('modal-purchase-detail')"><svg class="app-icon"><use href="#icon-close"/></svg></button>
+        </div>
+      </div>
+
+      <div class="modal-scrollable-body">
+        <div class="pd-hero">
+          <div class="pd-hero-label">نوع الصنف</div>
+          <div class="pd-hero-cat" id="pd-category">---</div>
+          <div class="pd-hero-label">الإجمالي الكلي</div>
+          <div class="pd-hero-total" id="pd-total">0 د.ع</div>
+        </div>
+
+        <div class="pd-items">
+          <div class="pd-items-head">
+            <span>المواد المشتراة</span>
+            <span class="count" id="pd-items-count">0</span>
+          </div>
+          <div id="pd-items-list"></div>
+        </div>
+
+        <div id="pd-notes-wrap" style="display:none; margin-bottom: 14px; padding: 11px 14px; background: var(--bg-subtle); border-radius: var(--r-md); border: 1px solid var(--border);">
+          <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.4px;">ملاحظات</div>
+          <div id="pd-notes" style="font-size: 13px; color: var(--text-primary); font-weight: 500; line-height: 1.5;"></div>
+        </div>
+      </div>
+
+      <div class="modal-sticky-footer">
+        <div class="btn-row-2" style="margin-top: 0;">
+          <button type="button" class="btn-submit" onclick="editPurchaseFromDetail()">
+            <svg class="app-icon"><use href="#icon-edit"/></svg> تعديل
+          </button>
+          <button type="button" class="btn-submit danger" onclick="deletePurchaseFromDetail()">
+            <svg class="app-icon"><use href="#icon-delete"/></svg> حذف
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SALE -->
+  <div id="modal-sale" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-top-wrap">
+        <div class="modal-handle"></div>
+        <div class="modal-head">
+          <h3 class="modal-title" id="sale-modal-title">إضافة عملية بيع</h3>
+          <button class="close-btn" onclick="closeModal('modal-sale')"><svg class="app-icon"><use href="#icon-close"/></svg></button>
+        </div>
+      </div>
+
+      <form id="sale-form" novalidate onsubmit="handleSaveSale(event)" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
+        <input type="hidden" id="sale-id" value="">
+        <input type="hidden" id="sale-locked-customer-id" value="">
+        
+        <div class="modal-scrollable-body">
+          <div id="sale-form-error" class="form-error">
+            <svg class="app-icon"><use href="#icon-error"/></svg>
+            <span id="sale-form-error-text"></span>
+          </div>
+
+          <div class="form-group" id="sale-customer-select-group">
+            <label class="form-label">الزبون</label>
+            <div class="select-row">
+              <input type="text" id="sale-customer-display-input" class="form-input" placeholder="اختر الزبون..." readonly onclick="openCustomerPicker()" style="cursor: pointer; font-size: 12px;">
+              <button type="button" class="btn-ghost-sm" onclick="openCustomerModal(true)">
+                <svg class="app-icon"><use href="#icon-user-add"/></svg> جديد
+              </button>
+              <select id="sale-customer-select" class="form-select" style="display: none;">
+                <option value="">اختر الزبون...</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="customer-locked" id="sale-customer-display" style="display:none;">
+            <div class="label" id="sale-customer-locked-label">البيع للزبون</div>
+            <div class="name" id="sale-customer-display-name">---</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" id="sale-materials-title-wrap">المواد المباعة</label>
+            <div class="materials-block">
+              <div class="materials-head">
+                <span class="materials-title"><svg class="app-icon"><use href="#icon-list"/></svg> قائمة المواد</span>
+              </div>
+
+              <div id="sale-materials-list"></div>
+
+              <button type="button" class="add-row-btn" onclick="addSaleMaterialRow()">
+                <svg class="app-icon"><use href="#icon-add"/></svg> إضافة مادة
+              </button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="form-group">
+              <label class="form-label" id="sale-paid-label">المبلغ المدفوع</label>
+              <div class="input-with-currency">
+                <input type="text" id="sale-paid" class="form-input" placeholder="0" oninput="handleFormattedInput(this, calculateSaleRemaining)" inputmode="numeric" pattern="[0-9.,]*" autocomplete="off">
+                <span class="currency-suffix">د.ع</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">المتبقي (دين)</label>
+              <div class="input-with-currency readonly">
+                <input type="text" id="sale-remaining-display" class="form-input" value="0" readonly>
+                <span class="currency-suffix">د.ع</span>
+              </div>
+            </div>
+          </div>
+
+          <label class="form-label">حالة الدفع</label>
+          <div class="pay-types">
+            <button type="button" class="pay-type" id="btn-type-full" onclick="setQuickPaymentType('full')">مدفوع</button>
+            <button type="button" class="pay-type" id="btn-type-partial" onclick="setQuickPaymentType('partial')">جزئي</button>
+            <button type="button" class="pay-type" id="btn-type-debt" onclick="setQuickPaymentType('debt')">دين</button>
+          </div>
+
+          <div class="form-group">
+  <label class="form-label">التاريخ</label>
+  <button type="button" class="date-field-btn" id="sale-date-btn" onclick="openDatePicker('sale')">
+    <svg class="app-icon"><use href="#icon-calendar"/></svg>
+    <span id="sale-date-display">اختر التاريخ</span>
+  </button>
+  <input type="hidden" id="sale-date" value="">
+</div>
+
+<div class="form-group">
+  <label class="form-label">ملاحظات (اختياري)</label>
+  <input type="text" id="sale-notes" class="form-input" placeholder="تفاصيل إضافية">
+</div>
+        </div>
+
+        <div class="modal-sticky-footer">
+          <div class="materials-total" style="margin-top:0; margin-bottom:10px;">
+            <span class="label" id="sale-total-label">إجمالي الفاتورة</span>
+            <span class="value" id="sale-total-preview">0 د.ع</span>
+          </div>
+          <button type="submit" id="sale-submit-btn" class="btn-submit">
+            <svg class="app-icon"><use href="#icon-check"/></svg> <span id="sale-submit-btn-text">حفظ عملية البيع</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CUSTOMER -->
+  <div id="modal-customer" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-top-wrap">
+        <div class="modal-handle"></div>
+        <div class="modal-head">
+          <h3 class="modal-title" id="cust-modal-title">إضافة زبون جديد</h3>
+          <button class="close-btn" onclick="closeModal('modal-customer')"><svg class="app-icon"><use href="#icon-close"/></svg></button>
+        </div>
+      </div>
+
+      <form id="customer-form" novalidate onsubmit="handleSaveCustomer(event)">
+        <div class="modal-scrollable-body">
+          <input type="hidden" id="cust-id" value="">
+          <div id="cust-form-error" class="form-error">
+            <svg class="app-icon"><use href="#icon-error"/></svg>
+            <span id="cust-form-error-text"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">اسم الزبون</label>
+            <input type="text" id="cust-name" class="form-input" placeholder="مثال: أحمد، أبو علي" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label class="form-label">رقم الهاتف (اختياري)</label>
+            <input type="tel" id="cust-phone" class="form-input" placeholder="07XXXXXXXXX" dir="ltr" style="text-align: right;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">ملاحظات (اختياري)</label>
+            <input type="text" id="cust-notes" class="form-input" placeholder="ملاحظات حول الزبون">
+          </div>
+        </div>
+
+        <div class="modal-sticky-footer">
+          <button type="submit" id="cust-submit-btn" class="btn-submit">
+            <svg class="app-icon"><use href="#icon-check"/></svg> حفظ الزبون
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CUSTOMER PICKER -->
+  <div id="modal-customer-picker" class="modal-overlay">
+    <div class="dialog-box" style="margin: auto; padding: 0; max-width: 340px;">
+      <div style="padding: 14px 16px 10px; border-bottom: 1px solid var(--border);">
+        <h3 style="font-size: 13.5px; font-weight: 800; color: var(--text-primary); margin: 0 0 10px 0; text-align: center;">اختر الزبون</h3>
+        <div class="search-wrap" style="margin-bottom: 0;">
+          <svg class="app-icon search-icon"><use href="#icon-search"/></svg>
+          <input type="text" id="customer-picker-search" class="search-input" placeholder="بحث بالاسم..." oninput="renderCustomerPickerList()" style="font-size: 12.5px; padding-top: 9px; padding-bottom: 9px;">
+        </div>
+      </div>
+      <div id="customer-picker-list" class="customer-picker-list"></div>
+      <div style="padding: 12px 16px; border-top: 1px solid var(--border);">
+        <button type="button" class="btn-submit" onclick="closeModal('modal-customer-picker')">
+          إغلاق
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CUSTOMER REPAYMENT -->
+  <div id="modal-cust-repay" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-top-wrap">
+        <div class="modal-handle"></div>
+        <div class="modal-head">
+          <h3 class="modal-title">تسجيل تسديد دين</h3>
+          <button class="close-btn" onclick="closeModal('modal-cust-repay')"><svg class="app-icon"><use href="#icon-close"/></svg></button>
+        </div>
+      </div>
+
+      <form id="cust-repay-form" novalidate onsubmit="handleSaveCustomerRepayment(event)">
+        <div class="modal-scrollable-body">
+          <div id="cust-repay-error" class="form-error">
+            <svg class="app-icon"><use href="#icon-error"/></svg>
+            <span id="cust-repay-error-text"></span>
+          </div>
+
+          <div style="background: var(--bg-subtle); padding: 13px 15px; border-radius: var(--r-md); margin-bottom: 14px; border: 1px solid var(--border);">
+            <div style="font-size: 12px; color: var(--text-muted); line-height: 1.3;" id="cust-repay-modal-name">الزبون: ---</div>
+            <div style="font-size: 15px; margin: 5px 0 0; line-height: 1.35; font-weight: 700;">الدين المتبقي: <strong style="color:var(--danger); font-family:var(--font-num);" id="cust-repay-modal-debt">0 د.ع</strong></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">المبلغ المسدد</label>
+            <div class="input-with-currency">
+              <input type="text" id="cust-repay-amount" class="form-input" placeholder="0" autofocus oninput="handleFormattedInput(this)" inputmode="numeric" pattern="[0-9.,]*" autocomplete="off">
+              <span class="currency-suffix">د.ع</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">ملاحظة التسديد (اختياري)</label>
+            <input type="text" id="cust-repay-notes" class="form-input" placeholder="دفعة نقدية، تحويل، جزء من الحساب">
+          </div>
+        </div>
+
+        <div class="modal-sticky-footer">
+          <button type="submit" id="cust-repay-submit-btn" class="btn-submit success">
+            <svg class="app-icon"><use href="#icon-done-all"/></svg> تأكيد التسديد
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT REPAYMENT -->
+  <div id="modal-edit-repay" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-top-wrap">
+        <div class="modal-handle"></div>
+        <div class="modal-head">
+          <h3 class="modal-title">تعديل دفعة التسديد</h3>
+          <button class="close-btn" onclick="closeModal('modal-edit-repay')"><svg class="app-icon"><use href="#icon-close"/></svg></button>
+        </div>
+      </div>
+
+      <form id="edit-repay-form" novalidate onsubmit="handleSaveEditRepayment(event)">
+        <div class="modal-scrollable-body">
+          <input type="hidden" id="edit-repay-id" value="">
+          <div id="edit-repay-error" class="form-error">
+            <svg class="app-icon"><use href="#icon-error"/></svg>
+            <span id="edit-repay-error-text"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">الزبون</label>
+            <input type="text" id="edit-repay-customer" class="form-input" readonly style="background:var(--bg-subtle); cursor:default;">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">المبلغ المسدد</label>
+            <div class="input-with-currency">
+              <input type="text" id="edit-repay-amount" class="form-input" placeholder="0" required oninput="handleFormattedInput(this)" inputmode="numeric" pattern="[0-9.,]*" autocomplete="off">
+              <span class="currency-suffix">د.ع</span>
+            </div>
+          </div>
+
+<div class="form-group">
+  <label class="form-label">التاريخ</label>
+  <button type="button" class="date-field-btn" id="edit-repay-date-btn" onclick="openDatePicker('edit-repay')">
+    <svg class="app-icon"><use href="#icon-calendar"/></svg>
+    <span id="edit-repay-date-display">اختر التاريخ</span>
+  </button>
+  <input type="hidden" id="edit-repay-date" value="">
+</div>
+
+<div class="form-group">
+  <label class="form-label">ملاحظة التسديد</label>
+  <input type="text" id="edit-repay-notes" class="form-input" placeholder="ملاحظة التسديد">
+</div>
+        </div>
+
+        <div class="modal-sticky-footer">
+          <button type="submit" id="edit-repay-submit-btn" class="btn-submit">
+            <svg class="app-icon"><use href="#icon-check"/></svg> حفظ التعديلات
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ACTIVITY LOG -->
+  <div id="modal-activity-log" class="modal-overlay">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-top-wrap">
+        <div class="modal-handle"></div>
+        <div class="modal-head">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <h3 class="modal-title">سجل النشاطات</h3>
+            <span id="activity-log-modal-count" class="badge badge-brand num" style="height:22px; min-height:22px; font-size:11px; padding:0 8px;">0</span>
+          </div>
+          <button class="close-btn" onclick="closeModal('modal-activity-log')"><svg class="app-icon"><use href="#icon-close"/></svg></button>
+        </div>
+      </div>
+
+      <div class="modal-scrollable-body">
+        <div style="display:flex; justify-content:flex-end; margin-bottom: 10px;">
+          <button type="button" class="btn-ghost-sm" style="color:var(--danger); border-color:var(--danger-border); font-size:11.5px; padding: 5px 10px;" onclick="confirmClearActivityLog()">
+            <svg class="app-icon" style="color:var(--danger); width:14px; height:14px;"><use href="#icon-delete"/></svg> حذف السجل بالكامل
+          </button>
+        </div>
+        <div id="activity-log-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PDF REPORT -->
+  <div id="modal-pdf-report" class="modal-overlay">
+    <div class="modal-content" style="max-width: 680px;">
+      <div class="modal-top-wrap">
+        <div class="modal-handle"></div>
+        <div class="modal-head">
+          <h3 class="modal-title" id="pdf-modal-title">كشف حساب</h3>
+          <button class="close-btn" onclick="closeModal('modal-pdf-report')"><svg class="app-icon"><use href="#icon-close"/></svg></button>
+        </div>
+      </div>
+
+      <div class="modal-scrollable-body">
+        <div class="pdf-toggles-block">
+          <label class="toggle-row">
+            <span class="toggle-row-label">إظهار سجل التسديدات في الكشف</span>
+            <span class="switch-ui">
+              <input type="checkbox" id="toggle-pdf-repayments" checked onchange="handlePDFToggleChange()">
+              <span class="switch-slider"></span>
+            </span>
+          </label>
+          <label class="toggle-row">
+            <span class="toggle-row-label">إظهار ملاحظات الزبون</span>
+            <span class="switch-ui">
+              <input type="checkbox" id="toggle-pdf-notes" checked onchange="handlePDFToggleChange()">
+              <span class="switch-slider"></span>
+            </span>
+          </label>
+        </div>
+
+        <div class="btn-row-2" style="margin-bottom: 14px; margin-top: 0;">
+          <button type="button" id="btn-direct-download-pdf" class="btn-submit" onclick="executePDFDownload()">
+            <svg class="app-icon"><use href="#icon-download"/></svg> تنزيل PDF
+          </button>
+          <button type="button" class="btn-submit success" onclick="printReportDirectly()">
+            <svg class="app-icon"><use href="#icon-print"/></svg> طباعة
+          </button>
+        </div>
+
+        <div id="pdf-download-progress-hint" style="font-size:11.5px; color:var(--text-muted); margin-bottom: 10px; text-align:center;"></div>
+        <div id="pdf-report-content-wrapper" class="pdf-preview-box"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: AUTH -->
+  <div id="modal-auth" class="dialog-overlay">
+    <div class="auth-modal-box">
+      <div class="auth-modal-head">
+        <button class="close-btn auth-modal-close" onclick="closeAuthModal()">
+          <svg class="app-icon"><use href="#icon-close"/></svg>
+        </button>
+        <div class="auth-modal-icon">
+          <svg class="app-icon" id="auth-modal-icon-svg"><use href="#icon-user-login"/></svg>
+        </div>
+        <div class="auth-modal-title" id="auth-modal-title">مرحباً بك مجدداً</div>
+        <div class="auth-modal-subtitle" id="auth-modal-subtitle">سجل دخولك للوصول إلى لوحة التحكم وبياناتك</div>
+      </div>
+
+      <div class="auth-tabs-wrap">
+        <div class="auth-tabs-segmented">
+          <button type="button" class="auth-tab active" id="auth-tab-login" onclick="switchAuthTab('login')">تسجيل الدخول</button>
+          <button type="button" class="auth-tab" id="auth-tab-signup" onclick="switchAuthTab('signup')">إنشاء حساب</button>
+        </div>
+      </div>
+
+      <div class="auth-modal-body">
+        <div id="auth-error" class="auth-error">
+          <svg class="app-icon"><use href="#icon-error"/></svg>
+          <span id="auth-error-text"></span>
+        </div>
+
+        <form id="auth-form-login" class="auth-form active" onsubmit="handleLogin(event)" novalidate>
+          <div class="form-group">
+            <label class="form-label">البريد الإلكتروني</label>
+            <input type="email" id="login-email" class="form-input auth-field-strong" placeholder="example@mail.com" autocomplete="email" required style="direction:ltr; text-align:right;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">كلمة المرور</label>
+            <div class="auth-input-wrap">
+              <input type="password" id="login-password" class="form-input auth-field-strong" placeholder="••••••••" autocomplete="current-password" required>
+              <button type="button" class="auth-eye-btn" onclick="togglePasswordVisibility('login-password', this)" tabindex="-1">
+                <svg class="app-icon"><use href="#icon-eye"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="auth-forgot-wrap">
+            <button type="button" class="auth-forgot-btn" id="btn-forgot-password" onclick="handleForgotPassword()">
+              هل نسيت كلمة المرور؟
+            </button>
+            <div class="auth-forgot-msg" id="auth-forgot-msg"></div>
+          </div>
+          <button type="submit" class="auth-submit-btn" id="login-submit-btn">
+            <svg class="app-icon"><use href="#icon-check"/></svg>
+            <span>تسجيل الدخول</span>
+          </button>
+        </form>
+
+        <form id="auth-form-signup" class="auth-form" onsubmit="handleSignup(event)" novalidate>
+          <div class="form-group">
+            <label class="form-label">الاسم / اسم المتجر</label>
+            <input type="text" id="signup-name" class="form-input auth-field-strong" placeholder="مثال: أحمد / متجر النور" autocomplete="name" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">البريد الإلكتروني</label>
+            <input type="email" id="signup-email" class="form-input auth-field-strong" placeholder="example@mail.com" autocomplete="email" required style="direction:ltr; text-align:right;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">كلمة المرور</label>
+            <div class="auth-input-wrap">
+              <input type="password" id="signup-password" class="form-input auth-field-strong" placeholder="6 أحرف على الأقل" autocomplete="new-password" required>
+              <button type="button" class="auth-eye-btn" onclick="togglePasswordVisibility('signup-password', this)" tabindex="-1">
+                <svg class="app-icon"><use href="#icon-eye"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">تأكيد كلمة المرور</label>
+            <div class="auth-input-wrap">
+              <input type="password" id="signup-password-confirm" class="form-input auth-field-strong" placeholder="••••••••" autocomplete="new-password" required>
+              <button type="button" class="auth-eye-btn" onclick="togglePasswordVisibility('signup-password-confirm', this)" tabindex="-1">
+                <svg class="app-icon"><use href="#icon-eye"/></svg>
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="auth-submit-btn" id="signup-submit-btn">
+            <svg class="app-icon"><use href="#icon-user-add"/></svg>
+            <span>إنشاء حساب</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT ACCOUNT -->
+  <div id="modal-edit-account" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-top-wrap">
+        <div class="modal-handle"></div>
+        <div class="modal-head">
+          <h3 class="modal-title">تعديل بيانات الحساب</h3>
+          <button class="close-btn" onclick="closeModal('modal-edit-account')">
+            <svg class="app-icon"><use href="#icon-close"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <form id="edit-account-form" novalidate onsubmit="handleSaveAccount(event)">
+        <div class="modal-scrollable-body">
+          <div id="edit-account-error" class="form-error">
+            <svg class="app-icon"><use href="#icon-error"/></svg>
+            <span id="edit-account-error-text"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">اسم الحساب</label>
+            <input type="text" id="edit-account-name" class="form-input"
+                   placeholder="اسمك أو اسم متجرك" autocomplete="name">
+          </div>
+
+          <div class="account-section-divider">
+            <div class="title">تغيير كلمة المرور</div>
+            <div class="subtitle">اترك هذه الحقول فارغة إذا لم ترغب بتغيير كلمة المرور</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">كلمة المرور الحالية</label>
+            <div class="auth-input-wrap">
+              <input type="password" id="edit-account-current-pass" class="form-input auth-field-strong"
+                     placeholder="••••••••" autocomplete="current-password">
+              <button type="button" class="auth-eye-btn"
+                      onclick="togglePasswordVisibility('edit-account-current-pass', this)" tabindex="-1">
+                <svg class="app-icon"><use href="#icon-eye"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">كلمة المرور الجديدة</label>
+            <div class="auth-input-wrap">
+              <input type="password" id="edit-account-new-pass" class="form-input auth-field-strong"
+                     placeholder="6 أحرف على الأقل" autocomplete="new-password">
+              <button type="button" class="auth-eye-btn"
+                      onclick="togglePasswordVisibility('edit-account-new-pass', this)" tabindex="-1">
+                <svg class="app-icon"><use href="#icon-eye"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">تأكيد كلمة المرور الجديدة</label>
+            <div class="auth-input-wrap">
+              <input type="password" id="edit-account-confirm-pass" class="form-input auth-field-strong"
+                     placeholder="••••••••" autocomplete="new-password">
+              <button type="button" class="auth-eye-btn"
+                      onclick="togglePasswordVisibility('edit-account-confirm-pass', this)" tabindex="-1">
+                <svg class="app-icon"><use href="#icon-eye"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="auth-forgot-wrap" style="text-align: right; margin-top: -6px;">
+            <button type="button" class="auth-forgot-btn" id="btn-edit-forgot-password"
+                    onclick="handleEditForgotPassword()">
+              هل نسيت كلمة المرور الحالية؟
+            </button>
+            <div class="auth-forgot-msg" id="edit-account-forgot-msg"></div>
+          </div>
+        </div>
+
+        <div class="modal-sticky-footer">
+          <button type="submit" id="edit-account-submit-btn" class="btn-submit">
+            <svg class="app-icon"><use href="#icon-check"/></svg>
+            حفظ التعديلات
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: NOTEBOOKS LIST -->
+  <div id="modal-notebooks" class="modal-overlay">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-top-wrap">
+        <div class="modal-handle"></div>
+        <div class="modal-head">
+          <h3 class="modal-title">الدفاتر</h3>
+          <button class="close-btn" onclick="closeModal('modal-notebooks')"><svg class="app-icon"><use href="#icon-close"/></svg></button>
+        </div>
+      </div>
+
+      <div class="modal-scrollable-body">
+        <div id="notebooks-list-container"></div>
+
+        <button type="button" class="add-row-btn" style="margin-top: 12px;" onclick="handleAddNotebookClick()">
+          <svg class="app-icon"><use href="#icon-add"/></svg> إضافة دفتر جديد
+        </button>
+
+        <div id="notebooks-guest-hint" style="display:none; margin-top: 10px; padding: 10px 12px; background: var(--warning-soft); border: 1px solid var(--warning-border); border-radius: var(--r-md); font-size: 12px; color: var(--warning); font-weight: 700; line-height: 1.5;">
+          لتتمكن من إضافة عدة دفاتر، سجّل الدخول أولاً.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / RENAME NOTEBOOK -->
+  <div id="modal-add-notebook" class="modal-overlay">
+    <div class="modal-content" style="max-width: 420px;">
+      <div class="modal-top-wrap">
+        <div class="modal-handle"></div>
+        <div class="modal-head">
+          <h3 class="modal-title" id="notebook-form-title">دفتر جديد</h3>
+          <button class="close-btn" onclick="closeModal('modal-add-notebook')"><svg class="app-icon"><use href="#icon-close"/></svg></button>
+        </div>
+      </div>
+
+      <form id="notebook-form" novalidate onsubmit="handleSaveNotebook(event)">
+        <div class="modal-scrollable-body">
+          <input type="hidden" id="notebook-id" value="">
+          <div id="notebook-form-error" class="form-error">
+            <svg class="app-icon"><use href="#icon-error"/></svg>
+            <span id="notebook-form-error-text"></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">اسم الدفتر</label>
+            <input type="text" id="notebook-name" class="form-input" placeholder="مثال: متجر النور، فرع بغداد..." autocomplete="off">
+          </div>
+        </div>
+
+        <div class="modal-sticky-footer">
+          <button type="submit" id="notebook-submit-btn" class="btn-submit">
+            <svg class="app-icon"><use href="#icon-check"/></svg> إنشاء الدفتر
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<!-- MODAL: DATE PICKER -->
+<div id="modal-date-picker" class="modal-overlay">
+  <div class="modal-content" style="max-width: 400px;">
+    <div class="modal-top-wrap">
+      <div class="modal-handle"></div>
+      <div class="modal-head">
+        <h3 class="modal-title">اختيار التاريخ</h3>
+        <button class="close-btn" onclick="closeModal('modal-date-picker')"><svg class="app-icon"><use href="#icon-close"/></svg></button>
+      </div>
+    </div>
+
+    <div style="padding: 16px 20px;">
+      <div class="date-picker-wheel">
+        <div class="date-picker-highlight"></div>
+        <div class="date-picker-col" id="dp-days"></div>
+        <div class="date-picker-col" id="dp-months"></div>
+        <div class="date-picker-col" id="dp-years"></div>
+      </div>
+    </div>
+
+    <div class="modal-sticky-footer">
+      <button type="button" class="btn-submit" onclick="confirmDatePicker()">
+        <svg class="app-icon"><use href="#icon-check"/></svg>
+        <span>تأكيد التاريخ</span>
+      </button>
+    </div>
+  </div>
+</div>
+<!-- MODAL: CURRENCY LIST -->
+<div id="modal-currency" class="modal-overlay">
+  <div class="dialog-box" style="margin: auto; padding: 0; max-width: 360px; position: relative;">
+    <button type="button" class="close-btn" onclick="closeModal('modal-currency')" style="position: absolute; top: 12px; left: 12px; z-index: 2;">
+      <svg class="app-icon"><use href="#icon-close"/></svg>
+    </button>
+    <div style="padding: 16px 20px 12px; border-bottom: 1px solid var(--border); text-align: center;">
+  <h3 style="font-size: 14px; font-weight: 800; color: var(--text-primary); margin: 0;">اختر العملة</h3>
+</div>
+    <div id="currency-list-container" class="currency-picker-list"></div>
+    <div style="padding: 12px 16px; border-top: 1px solid var(--border);">
+      <button type="button" class="currency-add-btn" onclick="openAddCurrencyModal()">
+        <svg class="app-icon"><use href="#icon-add"/></svg>
+        <span>إضافة عملة مخصصة</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ADD CUSTOM CURRENCY -->
+<div id="modal-add-currency" class="modal-overlay">
+  <div class="dialog-box" style="margin: auto; max-width: 400px; padding: 0; position: relative;">
+    <button type="button" class="close-btn" onclick="closeModal('modal-add-currency')" style="position: absolute; top: 12px; left: 12px; z-index: 2;">
+      <svg class="app-icon"><use href="#icon-close"/></svg>
+    </button>
+    <div style="padding: 16px 20px 12px; border-bottom: 1px solid var(--border); text-align: center;">
+      <h3 style="font-size: 14px; font-weight: 800; color: var(--text-primary); margin: 0;">إضافة عملة مخصصة</h3>
+    </div>
+
+    <form id="currency-form" novalidate onsubmit="handleSaveCustomCurrency(event)">
+      <div class="modal-scrollable-body">
+        <div id="currency-form-error" class="form-error">
+          <svg class="app-icon"><use href="#icon-error"/></svg>
+          <span id="currency-form-error-text"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">اسم العملة</label>
+          <input type="text" id="currency-form-name" class="form-input" placeholder="مثال: الدينار العراقي" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">بادئة العملة (الرمز)</label>
+          <input type="text" id="currency-form-symbol" class="form-input" placeholder="مثال: د.ع أو $" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">تنسيق الأرقام</label>
+          <div class="pay-types" style="grid-template-columns: 1fr 1fr; margin-bottom: 0;">
+            <label class="pay-type" id="format-comma-label" style="cursor: pointer;">
+              <input type="radio" name="currency-format" value="comma" checked style="display:none;" onchange="updateCurrencyFormatUI()">
+              <div style="font-size: 12.5px; font-weight: 800; margin-bottom: 4px;">فاصلة</div>
+              <div style="font-size: 11px; font-weight: 600; opacity: 0.8;">20,000 / 250,000</div>
+            </label>
+            <label class="pay-type" id="format-dot-label" style="cursor: pointer;">
+              <input type="radio" name="currency-format" value="dot" style="display:none;" onchange="updateCurrencyFormatUI()">
+              <div style="font-size: 12.5px; font-weight: 800; margin-bottom: 4px;">نقطة</div>
+              <div style="font-size: 11px; font-weight: 600; opacity: 0.8;">20.000 / 250.000</div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: 12px 16px; border-top: 1px solid var(--border);">
+  <button type="submit" id="currency-submit-btn" class="currency-add-btn">
+    <svg class="app-icon"><use href="#icon-check"/></svg>
+    <span>حفظ العملة</span>
+  </button>
+</div>
+    </form>
+  </div>
+</div>
+
+  <div id="pdf-render-container"></div>
+
+  <!-- Scripts -->
+  <script src="storage.js"></script>
+  <script src="firebase.js"></script>
+  <script src="ui.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
