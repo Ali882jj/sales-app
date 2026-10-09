@@ -2216,7 +2216,16 @@ reconcileCustomerDebts(rep.customerId);
       openModal('modal-pdf-report');
     }
 
-    async function executePDFDownload() {
+    // دالة مساعدة لتحويل DataUri إلى Base64 نقي
+function cleanBase64(dataUri) {
+  if (dataUri.includes(',')) {
+    return dataUri.split(',')[1];
+  }
+  return dataUri;
+}
+
+// 1. دالة التنزيل المباشر في مجلد Download
+async function executePDFDownload() {
   const customerId = state.currentReportCustomerId || state.selectedCustomerIdForDetail;
   const c = state.customers.find(item => item.id === customerId);
   if (!c) return;
@@ -2226,10 +2235,10 @@ reconcileCustomerDebts(rep.customerId);
   const progressHint = document.getElementById('pdf-download-progress-hint');
   const downloadBtn = document.getElementById('btn-direct-download-pdf');
   const safeName = c.name.replace(/[\/\\?%*:|"<>]/g, '-').replace(/\s+/g, '_');
-  const filename = `كشف-حساب-${safeName}.pdf`;
+  const filename = `كشف-حساب-${safeName}-${Date.now()}.pdf`;
 
   if (downloadBtn) downloadBtn.disabled = true;
-  if (progressHint) progressHint.innerText = 'جاري التحويل...';
+  if (progressHint) progressHint.innerText = 'جاري تحضير ملف PDF...';
 
   const opt = {
     margin: [8, 8, 8, 8],
@@ -2241,57 +2250,118 @@ reconcileCustomerDebts(rep.customerId);
   };
 
   try {
-    // توليد PDF كـ Base64
     const pdfDataUri = await html2pdf().set(opt).from(element).outputPdf('datauristring');
-    const base64Data = pdfDataUri.split(',')[1];
+    const base64Data = cleanBase64(pdfDataUri);
 
-    // محاولة Capacitor Filesystem
-    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem) {
-      const { Filesystem, Directory } = window.Capacitor.Plugins;
-      await Filesystem.writeFile({
-        path: filename,
-        data: base64Data,
-        directory: Directory.Documents,
-        recursive: true
-      });
+    // التحقق من وجود إضافة كاباسيتور
+    const cap = window.Capacitor;
+    const filesystem = cap?.Plugins?.Filesystem;
 
-      if (progressHint) progressHint.innerText = 'تم الحفظ في Documents';
-      showToast('تم حفظ الملف في مجلد Documents');
+    if (filesystem) {
+      // طلب أذونات التخزين إذا لزم الأمر
+      try {
+        const perm = await filesystem.checkPermissions();
+        if (perm.publicStorage !== 'granted') {
+          await filesystem.requestPermissions();
+        }
+      } catch (e) {
+        console.warn('Permissions warning:', e);
+      }
+
+      // الحفظ المباشر داخل مجلد Download العام الظاهر في تطبيق الملفات
+      let savedUri = '';
+      try {
+        const res = await filesystem.writeFile({
+          path: 'Download/' + filename,
+          data: base64Data,
+          directory: filesystem.Directory ? filesystem.Directory.ExternalStorage : 'EXTERNAL_STORAGE',
+          recursive: true
+        });
+        savedUri = res.uri;
+      } catch (e) {
+        // إذا رفض المسار الخارجي، الحفظ في Documents العام
+        const res = await filesystem.writeFile({
+          path: filename,
+          data: base64Data,
+          directory: filesystem.Directory ? filesystem.Directory.Documents : 'DOCUMENTS',
+          recursive: true
+        });
+        savedUri = res.uri;
+      }
+
+      if (progressHint) progressHint.innerText = 'تم حفظ الملف في مجلد التنزيلات بنجاح';
+      showToast('تم حفظ الملف في التنزيلات');
       return;
     }
 
-    // Fallback: مشاركة عادية (للمتصفح)
+    // متصفح عادي (الكمبيوتر)
     const pdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
-    const file = new File([pdfBlob], filename, { type: 'application/pdf' });
-
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: 'كشف حساب' });
-      if (progressHint) progressHint.innerText = 'تمت المشاركة';
-      showToast('اختر تطبيق لحفظ الملف');
-    } else {
-      const url = URL.createObjectURL(pdfBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 2000);
-      if (progressHint) progressHint.innerText = 'تم التنزيل';
-      showToast('تم تنزيل الملف');
-    }
+    const url = URL.createObjectURL(pdfBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    if (progressHint) progressHint.innerText = 'تم التنزيل';
+    showToast('تم تنزيل الملف');
   } catch (err) {
-    console.error(err);
-    if (err.name === 'AbortError') {
-      if (progressHint) progressHint.innerText = 'ألغيت المشاركة';
-    } else {
-      if (progressHint) progressHint.innerText = 'حدث خطأ';
-      showToast('تعذر التنزيل', true);
-    }
+    console.error('PDF Download Error:', err);
+    if (progressHint) progressHint.innerText = 'تعذر حفظ الملف';
+    showToast('حدث خطأ أثناء التنزيل', true);
   } finally {
     if (downloadBtn) downloadBtn.disabled = false;
   }
 }
+
+// 2. دالة الطباعة المباشرة
+async function printReportDirectly() {
+  const content = document.getElementById('report-printable-area');
+  if (!content) return;
+
+  const cap = window.Capacitor;
+  const share = cap?.Plugins?.Share;
+  const filesystem = cap?.Plugins?.Filesystem;
+
+  // إذا كنا داخل تطبيق الأندرويد، نولد الـ PDF مؤقتاً ونفتحه بواجهة الطباعة/العرض الأصلية
+  if (filesystem && share) {
+    showToast('جاري تجهيز الطباعة...');
+    const filename = `طباعة-${Date.now()}.pdf`;
+    const opt = {
+      margin: [8, 8, 8, 8],
+      filename: filename,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    try {
+      const pdfDataUri = await html2pdf().set(opt).from(content).outputPdf('datauristring');
+      const base64Data = cleanBase64(pdfDataUri);
+
+      const saved = await filesystem.writeFile({
+        path: filename,
+        data: base64Data,
+        directory: filesystem.Directory ? filesystem.Directory.Cache : 'CACHE'
+      });
+
+      // فتح نافذة المعاينة والطباعة الفورية عبر طابعات النظام
+      await share.share({
+        title: 'طباعة كشف الحساب',
+        url: saved.uri,
+        dialogTitle: 'اختر الطابعة أو تطبيق العرض'
+      });
+      return;
+    } catch (e) {
+      console.error('Print Error:', e);
+    }
+  }
+
+  // متصفح الويب العادي
+  window.print();
+}
+
 /* ============================================================
    CURRENCY MODALS
    ============================================================ */
