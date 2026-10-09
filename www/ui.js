@@ -2217,50 +2217,81 @@ reconcileCustomerDebts(rep.customerId);
     }
 
     async function executePDFDownload() {
-      const customerId = state.currentReportCustomerId || state.selectedCustomerIdForDetail;
-      const c = state.customers.find(item => item.id === customerId);
-      if (!c) return;
-      const element = document.getElementById('report-printable-area');
-      if (!element) return;
+  const customerId = state.currentReportCustomerId || state.selectedCustomerIdForDetail;
+  const c = state.customers.find(item => item.id === customerId);
+  if (!c) return;
+  const element = document.getElementById('report-printable-area');
+  if (!element) return;
 
-      const progressHint = document.getElementById('pdf-download-progress-hint');
-      const downloadBtn = document.getElementById('btn-direct-download-pdf');
-      const safeName = c.name.replace(/[\/\\?%*:|"<>]/g, '-').replace(/\s+/g, '_');
-      const filename = `كشف-حساب-${safeName}.pdf`;
+  const progressHint = document.getElementById('pdf-download-progress-hint');
+  const downloadBtn = document.getElementById('btn-direct-download-pdf');
+  const safeName = c.name.replace(/[\/\\?%*:|"<>]/g, '-').replace(/\s+/g, '_');
+  const filename = `كشف-حساب-${safeName}.pdf`;
 
-      if (downloadBtn) downloadBtn.disabled = true;
-      if (progressHint) progressHint.innerText = 'جاري التحويل...';
+  if (downloadBtn) downloadBtn.disabled = true;
+  if (progressHint) progressHint.innerText = 'جاري التحويل...';
 
-      const opt = {
-        margin: [8, 8, 8, 8], filename: filename, image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-      };
+  const opt = {
+    margin: [8, 8, 8, 8],
+    filename: filename,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, logging: false },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  };
 
-      try {
-        await html2pdf().set(opt).from(element).save();
-        if (progressHint) progressHint.innerText = `تم التنزيل`;
-        showToast(`تم تنزيل الملف`);
-      } catch (err) {
-        if (progressHint) progressHint.innerText = 'استخدم زر الطباعة';
-        showToast('تعذر التنزيل المباشر', true);
-      } finally {
-        if (downloadBtn) downloadBtn.disabled = false;
-      }
+  try {
+    // توليد PDF كـ Base64
+    const pdfDataUri = await html2pdf().set(opt).from(element).outputPdf('datauristring');
+    const base64Data = pdfDataUri.split(',')[1];
+
+    // محاولة Capacitor Filesystem
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem) {
+      const { Filesystem, Directory } = window.Capacitor.Plugins;
+      await Filesystem.writeFile({
+        path: filename,
+        data: base64Data,
+        directory: Directory.Documents,
+        recursive: true
+      });
+
+      if (progressHint) progressHint.innerText = 'تم الحفظ في Documents';
+      showToast('تم حفظ الملف في مجلد Documents');
+      return;
     }
 
-    function printReportDirectly() {
-      const content = document.getElementById('report-printable-area');
-      if (!content) return;
-      const printWindow = window.open('', '_blank');
-      if (printWindow) {
-        printWindow.document.write(`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>طباعة</title><style>body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; direction: rtl; text-align: right; margin: 0; padding: 20px; background: #ffffff; color: #111827; } @media print { body { padding: 0; } }</style></head><body>${content.innerHTML}</body></html>`);
-        printWindow.document.close(); 
-        printWindow.focus();
-        setTimeout(() => { printWindow.print(); }, 350);
-      } else { window.print(); }
+    // Fallback: مشاركة عادية (للمتصفح)
+    const pdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
+    const file = new File([pdfBlob], filename, { type: 'application/pdf' });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'كشف حساب' });
+      if (progressHint) progressHint.innerText = 'تمت المشاركة';
+      showToast('اختر تطبيق لحفظ الملف');
+    } else {
+      const url = URL.createObjectURL(pdfBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      if (progressHint) progressHint.innerText = 'تم التنزيل';
+      showToast('تم تنزيل الملف');
     }
+  } catch (err) {
+    console.error(err);
+    if (err.name === 'AbortError') {
+      if (progressHint) progressHint.innerText = 'ألغيت المشاركة';
+    } else {
+      if (progressHint) progressHint.innerText = 'حدث خطأ';
+      showToast('تعذر التنزيل', true);
+    }
+  } finally {
+    if (downloadBtn) downloadBtn.disabled = false;
+  }
+}
 /* ============================================================
    CURRENCY MODALS
    ============================================================ */
